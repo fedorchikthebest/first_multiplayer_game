@@ -17,7 +17,6 @@ class Connect:
                                        'p_id': str(p_id)})))
         data = loads(zlib.decompress(self.sock.recv(1024)))
         self.players = data.get('coords')
-        self.tick = 0
 
     def send_player_info(self, player, p_id):
         data = {'p_id': str(p_id), 'coords': [player.x, player.y,
@@ -40,3 +39,8 @@ class Connect:
         sock.connect((self.host, self.port))
         sock.send(zlib.compress(dumps({'type': 'exit', 'p_id': str(p_id)})))
         sock.close()
+
+    def get_moneys(self):
+        self.sock.send(zlib.compress(dumps({'type': 'get_moneys'})))
+        data = loads(zlib.decompress(self.sock.recv(1024)))
+        return data.get('coins')

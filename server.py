@@ -2,19 +2,22 @@ import socket
 from pickle import loads, dumps
 import zlib
 import threading
+import random
 
 
-def edit_map(x, y):
-    with open('./data/maps/map.txt') as f:
-        mp = list(map(list, input().split('\n')))
-        if mp[y][x] == ' ':
-            mp[y][x] = '#'
-        else:
-            mp[y][x] = ' '
+def spawn_money():
+    global moneys
+    with open('../pythonProject5/data/maps/map.txt') as f:
+        mp = list(map(list, f.read().split('\n')))
+        for i in range(len(mp)):
+            for z in range(len(mp[0])):
+                if mp[i][z] == ' ':
+                    if random.randrange(5) == 0:
+                        moneys.append([z, i])
 
 
 def accept_connect(conn, addr):
-    global players
+    global players, moneys, players_onlibe
     p_id = ''
     while True:
         data = conn.recv(1024)
@@ -25,9 +28,13 @@ def accept_connect(conn, addr):
             del players[data.get('p_id')]
             conn.close()
             return 0
+        if len(moneys) == 0:
+            spawn_money()
         if data.get('type') == 'player_info':
             players[data.get('p_id')] = data.get('coords')
             p_id = data.get('p_id')
+        if data.get('type') == 'get_moneys':
+            conn.send(zlib.compress(dumps({'coins': moneys})))
         if data.get('type') == 'get_players':
             d = []
             for i in players.values():
@@ -38,10 +45,12 @@ def accept_connect(conn, addr):
             except ConnectionError:
                 continue
         if data.get('type') == 'get_data':
-            with open('./data/maps/map.txt') as f:
+            with open('../pythonProject5/data/maps/map.txt') as f:
                 conn.send(zlib.compress(dumps({'map': f.read()})))
-    del players[p_id]
-    conn.close()
+    if p_id in players.keys():
+        del players[p_id]
+        conn.close()
+    players_onlibe -= 1
     return 0
 
 
@@ -53,6 +62,7 @@ players = {}
 connections = []
 players_onlibe = 0
 socket.timeout = 10
+moneys = []
 
 while True:
     if players_onlibe <= max_players:

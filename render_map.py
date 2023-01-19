@@ -15,6 +15,9 @@ class Map:
         size_x, size_y = self.tile_size_y, self.tile_size_x
         return self.board[int(y) // size_y][int(x) // size_x]
 
+    def transform_to_map_coords(self, x, y):
+        return int(x) // self.tile_size_x, int(y) // self.tile_size_y
+
     def draw(self, screen):
         for i in range(len(self.board)):
             for z in range(len(self.board[i])):
@@ -24,3 +27,11 @@ class Map:
                                             self.tile_size_y * i,
                                             self.tile_size_x,
                                             self.tile_size_y))
+
+    def draw_coins(self, coins, screen):
+        for x, y in coins:
+            screen.fill((0, 0, 255),
+                        pygame.Rect(self.tile_size_x * x,
+                                    self.tile_size_y * y,
+                                    self.tile_size_x,
+                                    self.tile_size_y))

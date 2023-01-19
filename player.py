@@ -41,8 +41,11 @@ class Player:
                 if keys[pygame.key.key_code("d")]:
                     new_x, new_y = move_forward(self.x, self.y,
                                                 self.angle + 90, -self.speed)
-                if map_r.get_elem_from_cords(new_x, new_y) != '#' and\
-                        map_r.get_elem_from_cords(new_x + 32, new_y + 32) != '#':
+                try:
+                    if map_r.get_elem_from_cords(new_x, new_y) != '#' and\
+                            map_r.get_elem_from_cords(new_x + 32, new_y + 32) != '#':
+                        self.x, self.y = new_x, new_y
+                except IndexError:
                     self.x, self.y = new_x, new_y
             if event.type == pygame.MOUSEMOTION:
                 mouse_x, mouse_y = event.pos
@@ -57,6 +60,12 @@ class Player:
         self.rect.x = self.x
         self.rect.y = self.y
         screen.blit(self.image, self.rect)
+
+    def coin_collision(self, coins, map_r):
+        if map_r.transform_to_map_coords(self.x, self.y) in coins or \
+                map_r.transform_to_map_coords(self.x + 32, self.y + 32) in coins:
+            return True
+        return False
 
 
 class MainPlayer(Player):
