@@ -18,7 +18,7 @@ if __name__ == '__main__':
     p_id = uuid.uuid1()
     connection = Connect('localhost', 9090)
     connection.send_player_info(player, p_id)
-    with open('../pythonProject5/data/maps/map.txt', 'w') as f:
+    with open('./data/maps/map.txt', 'w') as f:
         f.write(connection.get_map())
     map_r = Map('map.txt', TILE_SIZE_X, TILE_SIZE_Y)
     while True:

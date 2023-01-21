@@ -18,7 +18,8 @@ class Player:
         self.speed = 4
         self.role = role
         self.angle = a
-        self.old_image = pygame.image.load('./data/images/test.png').convert_alpha()
+        self.old_image = pygame.image.load(
+            './data/images/test.png').convert_alpha()
         self.image = self.old_image.copy()
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -85,8 +86,12 @@ class MainPlayer(Player):
                 if keys[pygame.key.key_code("d")]:
                     new_x, new_y = move_forward(self.x, self.y,
                                                 self.angle + 90, -self.speed)
-                if map_r.get_elem_from_cords(new_x, new_y) != '#' and\
-                        map_r.get_elem_from_cords(new_x + 32, new_y + 32) != '#':
+                try:
+                    if map_r.get_elem_from_cords(new_x, new_y) != '#' and\
+                            map_r.get_elem_from_cords(new_x + 32,
+                                                      new_y + 32) != '#':
+                        self.x, self.y = new_x, new_y
+                except IndexError:
                     self.x, self.y = new_x, new_y
             if event.type == pygame.MOUSEMOTION:
                 mouse_x, mouse_y = event.pos

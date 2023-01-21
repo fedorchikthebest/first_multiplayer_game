@@ -7,7 +7,7 @@ import random
 
 def spawn_money():
     global moneys
-    with open('../pythonProject5/data/maps/map.txt') as f:
+    with open('./data/maps/map.txt') as f:
         mp = list(map(list, f.read().split('\n')))
         for i in range(len(mp)):
             for z in range(len(mp[0])):
@@ -45,7 +45,7 @@ def accept_connect(conn, addr):
             except ConnectionError:
                 continue
         if data.get('type') == 'get_data':
-            with open('../pythonProject5/data/maps/map.txt') as f:
+            with open('./data/maps/map.txt') as f:
                 conn.send(zlib.compress(dumps({'map': f.read()})))
     if p_id in players.keys():
         del players[p_id]
