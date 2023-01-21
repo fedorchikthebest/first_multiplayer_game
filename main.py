@@ -1,11 +1,13 @@
-from render_map import Map
+from render_map import Map, Coin
 import pygame
 from player import MainPlayer, Player
 import sys
 import uuid
 from net_code_client import Connect
+from functions import load_image
 
 a = 0
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -18,6 +20,8 @@ if __name__ == '__main__':
     p_id = uuid.uuid1()
     connection = Connect('localhost', 9090)
     connection.send_player_info(player, p_id)
+    coins = pygame.sprite.Group()
+    coin = load_image('coin.png')
     with open('./data/maps/map.txt', 'w') as f:
         f.write(connection.get_map())
     map_r = Map('map.txt', TILE_SIZE_X, TILE_SIZE_Y)
@@ -33,7 +37,9 @@ if __name__ == '__main__':
         screen.fill((0, 255, 255))
         for i in players:
             i.draw(screen)
-        map_r.draw_coins(connection.get_moneys(), screen)
+        for x, y in connection.get_moneys():
+            coins.add(Coin(x * 80, y * 80, coin))
+        coins.draw(screen)
         map_r.draw(screen)
         player.draw(screen)
         pygame.display.flip()

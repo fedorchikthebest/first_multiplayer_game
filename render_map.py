@@ -7,6 +7,7 @@ class Map:
             self.board = list(map(list, f.read().split('\n')))
         self.tile_size_x = tile_size_x
         self.tile_size_y = tile_size_y
+        self.coins = pygame.sprite.Group()
 
     def get_elem_from_map(self, x, y):
         return self.board[y][x]
@@ -28,10 +29,12 @@ class Map:
                                             self.tile_size_x,
                                             self.tile_size_y))
 
-    def draw_coins(self, coins, screen):
-        for x, y in coins:
-            screen.fill((0, 0, 255),
-                        pygame.Rect(self.tile_size_x * x,
-                                    self.tile_size_y * y,
-                                    self.tile_size_x,
-                                    self.tile_size_y))
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = (16, 16)
+        self.rect.x = x
+        self.rect.y = y

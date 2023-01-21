@@ -9,7 +9,8 @@ def move_forward(x, y, a, step):
     return nx, ny
 
 
-class Player:
+class Player(pygame.sprite.Sprite):
+    image = load_image("mountains.png")
     def __init__(self, x, y, a, role):
         super().__init__()
         self.x = x
