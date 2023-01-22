@@ -37,4 +37,5 @@ class Coin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (16, 16)
         self.rect.x = x
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect.y = y

@@ -20,7 +20,7 @@ class Connect:
 
     def send_player_info(self, player, p_id):
         data = {'p_id': str(p_id), 'coords': [player.x, player.y,
-                                              int(player.angle), player.role],
+                                              int(player.angle)],
                 'type': 'player_info'}
         self.sock.send(zlib.compress(dumps(data)))
 
@@ -44,3 +44,8 @@ class Connect:
         self.sock.send(zlib.compress(dumps({'type': 'get_moneys'})))
         data = loads(zlib.decompress(self.sock.recv(1024)))
         return data.get('coins')
+
+    def collect_coin(self, x, y, p_id):
+        self.sock.send(zlib.compress(dumps({'type': 'collect_coin',
+                                            'coords': [x, y],
+                                            'p_id': p_id})))
