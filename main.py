@@ -4,4 +4,6 @@ a = 0
 
 
 if __name__ == '__main__':
-    game_window()
+        host = start_window()
+        if host is not None:
+                game_window(host)

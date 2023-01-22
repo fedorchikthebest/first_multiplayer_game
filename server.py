@@ -3,6 +3,7 @@ from pickle import loads, dumps
 import zlib
 import threading
 import random
+import sys
 
 
 def spawn_money():
@@ -14,15 +15,18 @@ def spawn_money():
         for i in range(len(mp)):
             for z in range(len(mp[0])):
                 if mp[i][z] == ' ':
-                    if random.randrange(5) == 0:
+                    if random.randrange(3) == 0:
                         coins.append([z, i])
                         moneys_ammount += 1
     moneys_generating = False
 
 
 def accept_connect(conn, addr):
-    global players, coins, players_online, moneys_generating, players_cash
+    global players, coins, players_online, moneys_generating,\
+        players_cash, finished
     p_id = ''
+    if finished:
+        return
     while True:
         data = conn.recv(1024)
         if not data:
@@ -34,10 +38,7 @@ def accept_connect(conn, addr):
             conn.close()
             return 0
 
-        if len(coins) == 0 and not moneys_generating:
-            spawn_money()
-
-        if data.get('type') == 'player_info':
+        if data.get('type') == 'player_info' and not finished:
             players[data.get('p_id')] = data.get('coords')
             p_id = data.get('p_id')
             coords = data.get('coords')
@@ -47,10 +48,17 @@ def accept_connect(conn, addr):
         if data.get('type') == 'get_moneys':
             conn.send(zlib.compress(dumps({'coins': coins})))
 
+        if data.get('type') == 'get_players_cash':
+            conn.send(zlib.compress(dumps({'cash': players_cash})))
+
         if data.get('type') == 'collect_coin':
             if data.get('coords') in coins:
                 players_cash[data.get('p_id')] += 1
                 del coins[coins.index(data.get('coords'))]
+
+        if data.get('type') == 'finish':
+            conn.send(zlib.compress(dumps({'coins': coins})))
+            finished = True
 
         if data.get('type') == 'get_players':
             d = []
@@ -58,9 +66,15 @@ def accept_connect(conn, addr):
                 if players.get(data.get('p_id')) != i:
                     d.append(i)
             try:
-                conn.send(zlib.compress(dumps({'coords': d})))
+                if finished:
+                    conn.send(zlib.compress(dumps({'coords': 'finish'})))
+                else:
+                    conn.send(zlib.compress(dumps({'coords': d})))
             except ConnectionError:
                 continue
+            if finished:
+                conn.close()
+                return
 
         if data.get('type') == 'get_data':
             with open('./data/maps/map.txt') as f:
@@ -84,9 +98,14 @@ socket.timeout = 10
 coins = []
 moneys_generating = False
 players_cash = {}
+finished = False
+
+spawn_money()
 
 while True:
-    if players_online <= max_players:
+    if finished:
+        break
+    if players_online <= max_players and not finished:
         conn, addr = sock.accept()
         thread = threading.Thread(target=accept_connect, args=(conn, addr))
         thread.start()

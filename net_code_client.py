@@ -49,3 +49,12 @@ class Connect:
         self.sock.send(zlib.compress(dumps({'type': 'collect_coin',
                                             'coords': [x, y],
                                             'p_id': p_id})))
+
+    def send_finish(self, coins):
+        if len(coins) == 0:
+            self.sock.send(zlib.compress(dumps({'type': 'finish'})))
+
+    def get_cash(self):
+        self.sock.send(zlib.compress(dumps({'type': 'get_players_cash'})))
+        data = loads(zlib.decompress(self.sock.recv(1024)))
+        return data.get('cash')
