@@ -4,4 +4,7 @@ a = 0
 
 
 if __name__ == '__main__':
-    start_window()
+    while True:
+        start_window()
+        game_window()
+        end_window()

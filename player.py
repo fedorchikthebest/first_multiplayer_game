@@ -1,7 +1,7 @@
 import pygame
 import render_map
 import math
-from functions import *
+from functions_and_classes import *
 
 
 def move_forward(x, y, a, step):
@@ -19,7 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = 4
         self.angle = a
         self.old_image = pygame.image.load(
-            './data/images/test.png').convert_alpha()
+            'data/images/player.png').convert_alpha()
         self.image = self.old_image.copy()
         self.image = pygame.transform.rotate(self.old_image, -int(self.angle))
         self.mask = pygame.mask.from_surface(self.image)

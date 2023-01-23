@@ -11,12 +11,15 @@ class Connect:
         self.stop_thread = False
         self.sock = socket.socket()
         self.sock.connect((self.host, self.port))
+        self.results = {}
 
     def get_players(self, p_id):
         self.sock.send(zlib.compress(dumps({'type': 'get_players',
                                        'p_id': str(p_id)})))
         data = loads(zlib.decompress(self.sock.recv(1024)))
         self.players = data.get('coords')
+        if data.get('coords') == 'finish':
+            self.results = data.get('result')
 
     def send_player_info(self, player, p_id):
         data = {'p_id': str(p_id), 'coords': [player.x, player.y,
@@ -53,6 +56,8 @@ class Connect:
     def send_finish(self, coins):
         if len(coins) == 0:
             self.sock.send(zlib.compress(dumps({'type': 'finish'})))
+            data = loads(zlib.decompress(self.sock.recv(1024)))
+            return data.get('coins')
 
     def get_cash(self):
         self.sock.send(zlib.compress(dumps({'type': 'get_players_cash'})))

@@ -3,7 +3,7 @@ from pickle import loads, dumps
 import zlib
 import threading
 import random
-import sys
+import os
 
 
 def spawn_money():
@@ -41,23 +41,22 @@ def accept_connect(conn, addr):
         if data.get('type') == 'player_info' and not finished:
             players[data.get('p_id')] = data.get('coords')
             p_id = data.get('p_id')
-            coords = data.get('coords')
             if p_id not in players_cash.keys():
-                players_cash[p_id] = 0
+                players_cash[str(p_id)] = 0
 
         if data.get('type') == 'get_moneys':
             conn.send(zlib.compress(dumps({'coins': coins})))
 
         if data.get('type') == 'get_players_cash':
-            conn.send(zlib.compress(dumps({'cash': players_cash})))
+            conn.send(zlib.compress(dumps({'coins': players_cash})))
 
         if data.get('type') == 'collect_coin':
             if data.get('coords') in coins:
-                players_cash[data.get('p_id')] += 1
+                players_cash[str(data.get('p_id'))] += 1
                 del coins[coins.index(data.get('coords'))]
 
         if data.get('type') == 'finish':
-            conn.send(zlib.compress(dumps({'coins': coins})))
+            conn.send(zlib.compress(dumps({'coins': players_cash})))
             finished = True
 
         if data.get('type') == 'get_players':
@@ -67,7 +66,12 @@ def accept_connect(conn, addr):
                     d.append(i)
             try:
                 if finished:
-                    conn.send(zlib.compress(dumps({'coords': 'finish'})))
+                    conn.send(zlib.compress(dumps({'coords': 'finish',
+                                                   'result': players_cash})))
+                    del players[data.get('p_id')]
+                    conn.close()
+                    if len(players) == 0:
+                        os.abort()
                 else:
                     conn.send(zlib.compress(dumps({'coords': d})))
             except ConnectionError:
@@ -108,5 +112,6 @@ while True:
     if players_online <= max_players and not finished:
         conn, addr = sock.accept()
         thread = threading.Thread(target=accept_connect, args=(conn, addr))
+        thread.setDaemon(True)
         thread.start()
         players_online += 1
