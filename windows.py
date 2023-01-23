@@ -30,13 +30,13 @@ def game_window(host):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 connection.send_exit(p_id)
-                sys.exit()
+                return True
             player.move(map_r, event)
         connection.send_player_info(player, p_id)
         connection.get_players(p_id)
         if connection.players == 'finish' or \
                 connection.players is None:
-            return connection.get_cash()
+            return connection.get_cash(), p_id
         for i in connection.players:
             players.add(Player(*i))
         screen.fill((0, 255, 255))
@@ -56,7 +56,7 @@ def game_window(host):
         clock.tick(60)
 
 
-def start_window():
+def start_window(result_r=None, p_id_r=None):
     pygame.init()
 
     pygame.display.set_caption('Quick Start')
@@ -94,7 +94,10 @@ def start_window():
                 if event.ui_element == connect:
                     try:
                         Connect(host_line.text, 9090).get_cash()
-                        return host_line.text
+                        host = host_line.text
+                        result, p_id = game_window(host)
+                        if type(result) == dict:
+                            return start_window(result, p_id)
                     except socket.gaierror:
                         text.set_text('Не корректный ip')
                     except ConnectionRefusedError:
